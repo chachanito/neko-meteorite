@@ -40,7 +40,7 @@
         }
         .background.is-active {
             opacity: 1;
-            transform: scale(1);
+            animation: scene-breathe 8s ease-in-out infinite alternate;
         }
         #effects {
             position: absolute;
@@ -109,7 +109,30 @@
             filter: drop-shadow(0 1px 1px #020817);
             transition: opacity 500ms ease;
         }
-        .scene[data-scene="2"] .tail { opacity: 0; }
+        .wind-grass {
+            position: absolute;
+            z-index: 3;
+            left: -4%;
+            right: -4%;
+            bottom: -1%;
+            height: 18%;
+            opacity: 0;
+            transform-origin: bottom center;
+            background: repeating-linear-gradient(77deg, transparent 0 13px, #486291 14px 15px, transparent 16px 25px);
+            clip-path: polygon(0 72%, 3% 55%, 5% 75%, 8% 43%, 10% 74%, 14% 52%, 17% 76%, 21% 38%, 24% 76%, 29% 49%, 33% 77%, 38% 40%, 41% 76%, 47% 48%, 52% 77%, 57% 42%, 61% 76%, 67% 51%, 72% 77%, 78% 39%, 82% 76%, 88% 50%, 92% 76%, 96% 43%, 100% 70%, 100% 100%, 0 100%);
+            mix-blend-mode: screen;
+            animation: grass-wind 2.8s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+        .scene[data-scene="1"] .wind-grass,
+        .scene[data-scene="2"] .wind-grass,
+        .scene[data-scene="3"] .wind-grass,
+        .scene[data-scene="10"] .wind-grass,
+        .scene[data-scene="15"] .wind-grass,
+        .scene[data-scene="18"] .wind-grass,
+        .scene[data-scene="20"] .wind-grass { opacity: .18; }
+        .tail { opacity: 0; }
+        .scene[data-scene="1"] .tail { opacity: 1; }
         .scene[data-scene="2"] .scarf-tip { opacity: .92; }
         .scene-info {
             position: absolute;
@@ -167,12 +190,20 @@
             from { transform: rotate(-7deg) skewX(-5deg); }
             to { transform: rotate(9deg) skewX(7deg) translateY(2px); }
         }
+        @keyframes scene-breathe {
+            from { transform: scale(1); }
+            to { transform: scale(1.012) translateY(-1px); }
+        }
+        @keyframes grass-wind {
+            from { transform: skewX(-2deg) translateX(-2px); }
+            to { transform: skewX(3deg) translateX(3px); }
+        }
         @media (max-aspect-ratio: 864 / 1242) {
             .scene { width: 100vw; height: auto; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .tail, .scarf-tip { animation: none; }
-            .background { transition: none; }
+            .tail, .scarf-tip, .wind-grass { animation: none; }
+            .background { transition: none; animation: none; }
         }
     </style>
 </head>
@@ -180,9 +211,28 @@
 <main class="scene" data-scene="1" aria-label="Colección de paisajes nocturnos animados">
     <img class="background is-active" src="assets/galaxy-neko.jpg" alt="Gato con audífonos contemplando la Vía Láctea desde una colina">
     <img class="background" src="assets/fox-meteor-valley.png" alt="Zorro con bufanda contemplando meteoritos sobre un valle de montaña">
+    <img class="background" loading="lazy" src="assets/03-rabbit-moon.png" alt="Conejo contemplando una luna creciente sobre un lago">
+    <img class="background" loading="lazy" src="assets/04-panda-fireflies.png" alt="Panda contemplando luciérnagas en un bosque de bambú">
+    <img class="background" loading="lazy" src="assets/05-owl-aurora.png" alt="Búho explorador contemplando auroras sobre ruinas nevadas">
+    <img class="background" loading="lazy" src="assets/06-raccoon-city.png" alt="Mapache con impermeable contemplando una ciudad nocturna">
+    <img class="background" loading="lazy" src="assets/07-deer-blossoms.png" alt="Ciervo contemplando una luna rosa entre cerezos">
+    <img class="background" loading="lazy" src="assets/08-penguin-aurora.png" alt="Pingüino contemplando auroras desde un iceberg">
+    <img class="background" loading="lazy" src="assets/09-capybara-springs.png" alt="Capibara relajándose en aguas termales bajo las estrellas">
+    <img class="background" loading="lazy" src="assets/10-corgi-sunflowers.png" alt="Corgi contemplando una galaxia desde un campo de girasoles">
+    <img class="background" loading="lazy" src="assets/11-red-panda-lanterns.png" alt="Panda rojo contemplando faroles sobre un valle">
+    <img class="background" loading="lazy" src="assets/12-koala-blue-moon.png" alt="Koala contemplando una luna azul desde un eucalipto">
+    <img class="background" loading="lazy" src="assets/13-elephant-planets.png" alt="Elefante contemplando planetas sobre un desierto">
+    <img class="background" loading="lazy" src="assets/14-otter-ocean.png" alt="Nutria contemplando un océano bioluminiscente">
+    <img class="background" loading="lazy" src="assets/15-hedgehog-mushrooms.png" alt="Erizo en un bosque de hongos luminosos">
+    <img class="background" loading="lazy" src="assets/16-polar-bear-cabin.png" alt="Oso polar contemplando auroras junto a una cabaña">
+    <img class="background" loading="lazy" src="assets/17-frog-lotus.png" alt="Rana contemplando un estanque de lotos iluminados">
+    <img class="background" loading="lazy" src="assets/18-wolf-storm.png" alt="Lobo contemplando una tormenta sobre el océano">
+    <img class="background" loading="lazy" src="assets/19-astronaut-cat.png" alt="Gato astronauta contemplando la Tierra desde la Luna">
+    <img class="background" loading="lazy" src="assets/20-duck-terraces.png" alt="Pato contemplando terrazas de arroz bajo la Vía Láctea">
     <canvas id="effects" width="432" height="621" aria-hidden="true"></canvas>
     <span class="tail" aria-hidden="true"></span>
     <span class="scarf-tip" aria-hidden="true"></span>
+    <span class="wind-grass" aria-hidden="true"></span>
     <div class="glow" aria-hidden="true"></div>
     <nav class="nav" aria-label="Cambiar escenario">
         <button type="button" class="previous" aria-label="Escena anterior">‹</button>
@@ -200,7 +250,20 @@
     const scene = document.querySelector('.scene');
     const backgrounds = [...document.querySelectorAll('.background')];
     const sceneInfo = document.querySelector('.scene-info');
-    const sceneNames = ['01 · Neko cósmico', '02 · Zorro meteorito'];
+    const sceneNames = [
+        '01 · Neko cósmico', '02 · Zorro meteorito', '03 · Conejo lunar',
+        '04 · Panda luciérnaga', '05 · Búho aurora', '06 · Mapache neón',
+        '07 · Ciervo sakura', '08 · Pingüino polar', '09 · Capibara termal',
+        '10 · Corgi girasol', '11 · Panda rojo faroles', '12 · Koala luna azul',
+        '13 · Elefante planetario', '14 · Nutria bioluminiscente',
+        '15 · Erizo encantado', '16 · Oso polar', '17 · Rana de loto',
+        '18 · Lobo de tormenta', '19 · Gato astronauta', '20 · Pato de terrazas'
+    ];
+    const sceneEffects = [
+        'stars', 'meteors', 'petals', 'fireflies', 'aurora', 'rain',
+        'petals', 'snow', 'steam', 'fireflies', 'lanterns', 'leaves',
+        'sand', 'bubbles', 'spores', 'snow', 'petals', 'rain', 'comets', 'fireflies'
+    ];
     let activeScene = 0;
     const W = canvas.width;
     const skyLimit = 408;
@@ -210,6 +273,7 @@
         activeScene = (nextIndex + backgrounds.length) % backgrounds.length;
         backgrounds.forEach((image, index) => image.classList.toggle('is-active', index === activeScene));
         scene.dataset.scene = String(activeScene + 1);
+        scene.dataset.effect = sceneEffects[activeScene];
         sceneInfo.textContent = sceneNames[activeScene];
         const url = new URL(location.href);
         url.searchParams.set('scene', String(activeScene + 1));
@@ -226,6 +290,14 @@
 
     let seed = 28471;
     const random = () => ((seed = seed * 16807 % 2147483647) - 1) / 2147483646;
+
+    const ambient = Array.from({ length: 52 }, () => ({
+        x: random() * W,
+        y: random() * canvas.height,
+        speed: .3 + random() * 1.35,
+        size: .6 + random() * 2.2,
+        phase: random() * Math.PI * 2
+    }));
 
     const stars = Array.from({ length: 90 }, (_, index) => ({
         x: random() * W,
@@ -269,6 +341,39 @@
         }
     }
 
+    function drawAmbient(time) {
+        const effect = sceneEffects[activeScene];
+        if (effect === 'stars' || effect === 'meteors' || effect === 'aurora' || effect === 'comets') return;
+
+        for (const particle of ambient) {
+            let x = particle.x;
+            let y = (particle.y + time * particle.speed * 9) % canvas.height;
+            let alpha = .18 + .42 * ((Math.sin(time * 1.3 + particle.phase) + 1) / 2);
+            let color = '255,255,255';
+
+            if (['fireflies', 'lanterns', 'bubbles', 'steam', 'spores'].includes(effect)) {
+                y = canvas.height - ((particle.y + time * particle.speed * 6) % canvas.height);
+            }
+            if (effect === 'rain') { color = '170,210,255'; alpha *= .7; }
+            if (effect === 'petals') { color = '255,175,218'; x += Math.sin(time + particle.phase) * 12; }
+            if (effect === 'leaves') { color = '210,224,190'; x += Math.sin(time * .7 + particle.phase) * 17; }
+            if (effect === 'sand') { color = '255,199,121'; x = (x + time * particle.speed * 8) % W; }
+            if (effect === 'fireflies' || effect === 'lanterns') color = '255,205,73';
+            if (effect === 'bubbles') color = '80,246,255';
+            if (effect === 'spores') color = '104,220,255';
+            if (effect === 'steam') { color = '225,220,255'; alpha *= .28; }
+
+            ctx.fillStyle = `rgba(${color},${alpha})`;
+            if (effect === 'rain') {
+                ctx.fillRect(x, y, 1, 5 + particle.size * 2);
+            } else {
+                ctx.beginPath();
+                ctx.arc(x, y, effect === 'lanterns' ? particle.size * 1.6 : particle.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    }
+
     function drawShootingStar(time, offset, startX, startY) {
         const duration = 1.35;
         const wait = 7.8;
@@ -305,6 +410,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGalaxyDust(reduced ? 1 : time);
         drawStars(reduced ? 1 : time);
+        drawAmbient(reduced ? 1 : time);
         drawShootingStar(time, 0, -45, 82);
         drawShootingStar(time, 4.4, 210, 35);
         requestAnimationFrame(frame);
