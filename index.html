@@ -47,7 +47,7 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            z-index: 2;
+            z-index: 4;
             pointer-events: none;
         }
         .tail {
@@ -86,7 +86,7 @@
         .glow {
             position: absolute;
             inset: 0;
-            z-index: 4;
+            z-index: 5;
             pointer-events: none;
             background:
                 radial-gradient(circle at 48% 40%, #aa71ff12 0 18%, transparent 42%),
@@ -140,6 +140,62 @@
             pointer-events: none;
             transition: opacity 500ms ease;
         }
+        .motion-copy {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            opacity: 0;
+            pointer-events: none;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            will-change: transform;
+        }
+        .animal-motion {
+            -webkit-mask-image: radial-gradient(ellipse 18% 17% at 50% 70.5%, #000 0 58%, #000b 72%, transparent 100%);
+            mask-image: radial-gradient(ellipse 18% 17% at 50% 70.5%, #000 0 58%, #000b 72%, transparent 100%);
+            transform-origin: 50% 78%;
+            animation: animal-alive 3.4s ease-in-out infinite alternate;
+        }
+        .scene:not([data-scene="21"]) .animal-motion { opacity: 1; }
+        .foreground-motion {
+            -webkit-mask-image: linear-gradient(to bottom, transparent 61%, #0005 69%, #000 79%);
+            mask-image: linear-gradient(to bottom, transparent 61%, #0005 69%, #000 79%);
+            transform-origin: center bottom;
+            animation: foreground-drift 6.5s ease-in-out infinite alternate;
+        }
+        .scene:not([data-scene="21"]) .foreground-motion { opacity: .82; }
+        .nature-left {
+            -webkit-mask-image: linear-gradient(105deg, #000 0 12%, #000b 21%, transparent 39%);
+            mask-image: linear-gradient(105deg, #000 0 12%, #000b 21%, transparent 39%);
+            transform-origin: left 70%;
+            animation: branch-sway-left 5.4s ease-in-out infinite alternate;
+        }
+        .nature-right {
+            -webkit-mask-image: linear-gradient(255deg, #000 0 12%, #000b 21%, transparent 39%);
+            mask-image: linear-gradient(255deg, #000 0 12%, #000b 21%, transparent 39%);
+            transform-origin: right 70%;
+            animation: branch-sway-right 6.1s ease-in-out infinite alternate;
+        }
+        .scene[data-nature="true"]:not([data-scene="21"]) .nature-left,
+        .scene[data-nature="true"]:not([data-scene="21"]) .nature-right { opacity: .9; }
+        .water-motion {
+            position: absolute;
+            z-index: 3;
+            left: 0;
+            right: 0;
+            top: 54%;
+            height: 28%;
+            opacity: 0;
+            pointer-events: none;
+            background:
+                repeating-radial-gradient(ellipse at 50% 25%, transparent 0 14px, #d6e7ff48 15px 16px, transparent 17px 28px),
+                linear-gradient(100deg, transparent 12%, #b9d8ff28 50%, transparent 82%);
+            mask-image: linear-gradient(transparent, #000 22%, #000 75%, transparent);
+            mix-blend-mode: screen;
+            animation: lake-current 5.5s linear infinite;
+        }
+        .scene[data-water="true"]:not([data-scene="21"]) .water-motion { opacity: .28; }
         .scene[data-scene="21"] .persian-layer { opacity: 1; }
         .persian-character {
             background: url('assets/21-persian-cat-lake.png') center / cover no-repeat;
@@ -166,8 +222,9 @@
                 repeating-radial-gradient(ellipse at 50% 35%, transparent 0 12px, #b8d8ff45 13px 14px, transparent 15px 25px);
             mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
             mix-blend-mode: screen;
-            animation: water-flow 4.5s linear infinite;
+            animation: none;
         }
+        .scene[data-scene="21"] .water-ripples { animation: water-flow 4.5s linear infinite; }
         .tail { opacity: 0; }
         .scene[data-scene="1"] .tail { opacity: 1; }
         .scene[data-scene="2"] .scarf-tip { opacity: .92; }
@@ -248,11 +305,34 @@
             50% { opacity: .3; }
             to { transform: translateY(8px) scaleX(1.025); opacity: .18; }
         }
+        @keyframes animal-alive {
+            from { transform: translateY(0) scale(1); }
+            55% { transform: translateY(-1px) scale(1.004, 1.01); }
+            to { transform: translateY(0) rotate(.12deg) scale(1.002); }
+        }
+        @keyframes foreground-drift {
+            from { transform: translateX(-1px) scale(1.002); }
+            to { transform: translateX(2px) scale(1.008); }
+        }
+        @keyframes branch-sway-left {
+            from { transform: skewX(-.2deg) rotate(-.05deg); }
+            to { transform: skewX(.65deg) rotate(.12deg); }
+        }
+        @keyframes branch-sway-right {
+            from { transform: skewX(.2deg) rotate(.05deg); }
+            to { transform: skewX(-.6deg) rotate(-.1deg); }
+        }
+        @keyframes lake-current {
+            from { transform: translate(-5px, 0) scaleX(.98); filter: brightness(.9); }
+            50% { filter: brightness(1.2); }
+            to { transform: translate(7px, 7px) scaleX(1.025); filter: brightness(.95); }
+        }
         @media (max-aspect-ratio: 864 / 1242) {
             .scene { width: 100vw; height: auto; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .tail, .scarf-tip, .wind-grass, .persian-layer { animation: none; }
+            .tail, .scarf-tip, .wind-grass, .persian-layer,
+            .motion-copy, .water-motion { animation: none; }
             .background { transition: none; animation: none; }
         }
     </style>
@@ -280,6 +360,11 @@
     <img class="background" loading="lazy" src="assets/19-astronaut-cat.png" alt="Gato astronauta contemplando la Tierra desde la Luna">
     <img class="background" loading="lazy" src="assets/20-duck-terraces.png" alt="Pato contemplando terrazas de arroz bajo la Vía Láctea">
     <img class="background" loading="lazy" src="assets/21-persian-cat-lake.png" alt="Gato persa contemplando la Vía Láctea reflejada en un lago">
+    <span class="motion-copy foreground-motion" aria-hidden="true"></span>
+    <span class="motion-copy nature-left" aria-hidden="true"></span>
+    <span class="motion-copy nature-right" aria-hidden="true"></span>
+    <span class="motion-copy animal-motion" aria-hidden="true"></span>
+    <span class="water-motion" aria-hidden="true"></span>
     <canvas id="effects" width="432" height="621" aria-hidden="true"></canvas>
     <span class="persian-layer persian-tree-left" aria-hidden="true"></span>
     <span class="persian-layer persian-tree-right" aria-hidden="true"></span>
@@ -321,6 +406,9 @@
         'sand', 'bubbles', 'spores', 'snow', 'petals', 'rain', 'comets', 'fireflies',
         'persian'
     ];
+    const natureScenes = new Set([1, 2, 3, 4, 7, 9, 10, 11, 12, 15, 16, 17, 18, 20, 21]);
+    const waterScenes = new Set([3, 8, 9, 11, 12, 14, 17, 18, 20, 21]);
+    const copiedLayers = [...document.querySelectorAll('.motion-copy')];
     let activeScene = 0;
     const W = canvas.width;
     const skyLimit = 408;
@@ -329,8 +417,14 @@
     function showScene(nextIndex) {
         activeScene = (nextIndex + backgrounds.length) % backgrounds.length;
         backgrounds.forEach((image, index) => image.classList.toggle('is-active', index === activeScene));
-        scene.dataset.scene = String(activeScene + 1);
+        const sceneNumber = activeScene + 1;
+        scene.dataset.scene = String(sceneNumber);
         scene.dataset.effect = sceneEffects[activeScene];
+        scene.dataset.nature = String(natureScenes.has(sceneNumber));
+        scene.dataset.water = String(waterScenes.has(sceneNumber));
+        const activeImage = backgrounds[activeScene];
+        const activeImageUrl = `url("${activeImage.currentSrc || activeImage.src}")`;
+        copiedLayers.forEach(layer => { layer.style.backgroundImage = activeImageUrl; });
         sceneInfo.textContent = sceneNames[activeScene];
         const url = new URL(location.href);
         url.searchParams.set('scene', String(activeScene + 1));
