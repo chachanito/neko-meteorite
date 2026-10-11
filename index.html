@@ -336,6 +336,64 @@
             .background { transition: none; animation: none; }
         }
     </style>
+  <style id="pixel-world-styles">
+    /* Pixel-art rebuild: preserve hard pixels and remove whole-image warping. */
+    .background {
+      image-rendering: pixelated !important;
+      image-rendering: crisp-edges !important;
+      animation: none !important;
+    }
+
+    .water-motion,
+    .water-ripples,
+    .foreground-motion,
+    .nature-left,
+    .nature-right,
+    .persian-tree-left,
+    .persian-tree-right {
+      display: none !important;
+    }
+
+    .animal-motion,
+    .persian-character {
+      image-rendering: pixelated !important;
+      animation: pixel-animal-life 3.6s steps(7, end) infinite !important;
+      transform-origin: 50% 88% !important;
+      will-change: transform;
+    }
+
+    @keyframes pixel-animal-life {
+      0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); }
+      28%      { transform: translate3d(0, -1px, 0) scaleY(1.004); }
+      52%      { transform: translate3d(1px, -2px, 0) scaleY(1.008); }
+      76%      { transform: translate3d(0, -1px, 0) scaleY(1.003); }
+    }
+
+    #pixel-nature {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 8;
+      pointer-events: none;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .scene-info,
+    .nav-button,
+    .navigation,
+    button {
+      position: relative;
+      z-index: 30;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animal-motion,
+      .persian-character { animation: none !important; }
+      #pixel-nature { display: none; }
+    }
+  </style>
 </head>
 <body>
 <main class="scene" data-scene="1" aria-label="Colección de paisajes nocturnos animados">
@@ -570,5 +628,166 @@
     requestAnimationFrame(frame);
 })();
 </script>
+  <script id="pixel-world-engine">
+    (() => {
+      const PIXEL_WIDTH = 270;
+      const backgrounds = [...document.querySelectorAll('.background')];
+      const pixelSources = new Map();
+      const canvas = document.createElement('canvas');
+      canvas.id = 'pixel-nature';
+      canvas.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d', { alpha: true });
+      ctx.imageSmoothingEnabled = false;
+
+      const palettes = [
+        ['#14234d','#263d73','#5267a0'], ['#25183d','#59304f','#bd6c5f'],
+        ['#18274a','#324e71','#7794aa'], ['#183b37','#34705c','#7dbb7f'],
+        ['#132f42','#275d69','#6ca5a0'], ['#1b223f','#4b4169','#a0739b'],
+        ['#25394b','#51726c','#9bb18a'], ['#14334a','#2c7182','#7ed1cc'],
+        ['#2a3e35','#4e7957','#a0bd72'], ['#3f3a24','#7d7339','#d2bd64'],
+        ['#263524','#53663a','#a8a45a'], ['#162c34','#35616b','#82a49c'],
+        ['#182249','#384482','#7f75bd'], ['#123a4a','#287387','#7fc2bd'],
+        ['#203329','#4d6748','#9c9a63'], ['#24313b','#53616c','#a3acae'],
+        ['#153d38','#2d7666','#78b985'], ['#232337','#515069','#9695a4'],
+        ['#202143','#554e82','#a68bc2'], ['#30452c','#668052','#b5b66b'],
+        ['#163044','#356779','#86a9a4']
+      ];
+
+      let sceneIndex = 0;
+      let logicalHeight = 480;
+      let lastFrame = 0;
+      let reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const seeded = (n) => {
+        const x = Math.sin(n * 91.731 + sceneIndex * 17.117) * 43758.5453;
+        return x - Math.floor(x);
+      };
+
+      function resizePixelCanvas() {
+        logicalHeight = Math.max(360, Math.round(innerHeight / Math.max(1, innerWidth) * PIXEL_WIDTH));
+        canvas.width = PIXEL_WIDTH;
+        canvas.height = logicalHeight;
+        ctx.imageSmoothingEnabled = false;
+      }
+
+      function pixelateImage(img, index) {
+        if (!img || img.dataset.pixelReady === '1') return;
+        const original = img.currentSrc || img.src;
+        img.dataset.pixelOriginal = original;
+        const source = new Image();
+        source.onload = () => {
+          const small = document.createElement('canvas');
+          const ratio = source.naturalHeight / source.naturalWidth;
+          small.width = PIXEL_WIDTH;
+          small.height = Math.max(1, Math.round(PIXEL_WIDTH * ratio));
+          const sctx = small.getContext('2d');
+          sctx.imageSmoothingEnabled = false;
+          sctx.drawImage(source, 0, 0, small.width, small.height);
+          const url = small.toDataURL('image/png');
+          pixelSources.set(index, url);
+          img.src = url;
+          img.dataset.pixelReady = '1';
+          syncAnimalLayer();
+        };
+        source.src = original;
+      }
+
+      function activeIndex() {
+        const found = backgrounds.findIndex(img => img.classList.contains('active'));
+        return found < 0 ? 0 : found;
+      }
+
+      function syncAnimalLayer() {
+        sceneIndex = activeIndex();
+        const url = pixelSources.get(sceneIndex);
+        /* The Persian scene owns a separately aligned character layer. */
+        document.querySelectorAll('.animal-motion').forEach(layer => {
+          if (url) layer.style.backgroundImage = `url("${url}")`;
+        });
+      }
+
+      function drawStar(x, y, brightness, phase) {
+        const pulse = Math.sin(phase) > 0.45;
+        ctx.fillStyle = brightness;
+        ctx.fillRect(x, y, 1, 1);
+        if (pulse) {
+          ctx.fillRect(x - 1, y, 3, 1);
+          ctx.fillRect(x, y - 1, 1, 3);
+        }
+      }
+
+      function drawGrass(t) {
+        const palette = palettes[sceneIndex % palettes.length];
+        const wind = Math.sin(t * 0.00135 + sceneIndex * 0.7);
+        const count = 88;
+        for (let i = 0; i < count; i++) {
+          const x = Math.floor(seeded(i + 3) * PIXEL_WIDTH);
+          const depth = seeded(i + 201);
+          const baseY = Math.floor(logicalHeight * (0.84 + depth * 0.16));
+          const h = 3 + Math.floor(seeded(i + 401) * 9);
+          const localWind = Math.round(wind * (1 + seeded(i + 601) * 2));
+          ctx.fillStyle = palette[i % palette.length];
+          for (let p = 0; p < h; p++) {
+            const bend = Math.round(localWind * (p / h));
+            ctx.fillRect(x + bend, baseY - p, p > h * 0.72 ? 1 : 2, 1);
+          }
+          if (i % 9 === 0) {
+            const leafY = baseY - Math.floor(h * 0.55);
+            ctx.fillRect(x + localWind + 1, leafY, 2, 1);
+          }
+        }
+      }
+
+      function drawSidePlants(t) {
+        const palette = palettes[sceneIndex % palettes.length];
+        const wind = Math.round(Math.sin(t * 0.0011 + sceneIndex) * 2);
+        for (let side = 0; side < 2; side++) {
+          const origin = side ? PIXEL_WIDTH - 3 : 2;
+          const direction = side ? -1 : 1;
+          for (let b = 0; b < 4; b++) {
+            const baseY = Math.floor(logicalHeight * (0.8 + b * 0.047));
+            const height = 22 + b * 7;
+            ctx.fillStyle = palette[b % 2];
+            for (let p = 0; p < height; p++) {
+              const sway = Math.round((wind + direction * b) * (p / height));
+              ctx.fillRect(origin + direction * Math.floor(p * 0.16) + sway, baseY - p, 2, 2);
+              if (p > 6 && p % 7 === 0) {
+                const lx = origin + direction * Math.floor(p * 0.16) + sway;
+                ctx.fillStyle = palette[2];
+                ctx.fillRect(lx, baseY - p, direction * 4, 2);
+                ctx.fillStyle = palette[b % 2];
+              }
+            }
+          }
+        }
+      }
+
+      function render(t) {
+        if (!reducedMotion && t - lastFrame >= 83) {
+          lastFrame = t;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (let i = 0; i < 34; i++) {
+            const x = Math.floor(seeded(i + 900) * PIXEL_WIDTH);
+            const y = Math.floor(seeded(i + 1200) * logicalHeight * 0.62);
+            drawStar(x, y, i % 4 ? '#dbe8ff' : '#dba8ff', t * 0.002 + i * 1.7);
+          }
+          drawGrass(t);
+          drawSidePlants(t);
+        }
+        requestAnimationFrame(render);
+      }
+
+      backgrounds.forEach(pixelateImage);
+      resizePixelCanvas();
+      syncAnimalLayer();
+      addEventListener('resize', resizePixelCanvas, { passive: true });
+      matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', e => reducedMotion = e.matches);
+
+      const observer = new MutationObserver(() => requestAnimationFrame(syncAnimalLayer));
+      backgrounds.forEach(img => observer.observe(img, { attributes: true, attributeFilter: ['class'] }));
+      requestAnimationFrame(render);
+    })();
+  </script>
 </body>
 </html>
