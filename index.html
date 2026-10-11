@@ -34,6 +34,13 @@
             object-fit: cover;
             user-select: none;
             pointer-events: none;
+            opacity: 0;
+            transform: scale(1.025);
+            transition: opacity 900ms ease, transform 4s ease;
+        }
+        .background.is-active {
+            opacity: 1;
+            transform: scale(1);
         }
         #effects {
             position: absolute;
@@ -53,6 +60,7 @@
             transform-origin: 80% 82%;
             animation: wag 1.65s ease-in-out infinite alternate;
             filter: drop-shadow(-1px 1px 0 #171323) drop-shadow(1px 0 0 #171323);
+            transition: opacity 500ms ease;
         }
         .tail::before {
             content: '';
@@ -85,25 +93,102 @@
                 linear-gradient(180deg, transparent 68%, #03041222 100%);
             mix-blend-mode: screen;
         }
+        .scarf-tip {
+            position: absolute;
+            z-index: 3;
+            left: 55.2%;
+            top: 69.2%;
+            width: 9.5%;
+            height: 1.65%;
+            border-radius: 20% 75% 45% 20%;
+            background: linear-gradient(180deg, #17678b, #08405f);
+            clip-path: polygon(0 10%, 100% 0, 86% 100%, 0 75%);
+            transform-origin: left center;
+            opacity: 0;
+            animation: scarf-wave 2.2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 1px 1px #020817);
+            transition: opacity 500ms ease;
+        }
+        .scene[data-scene="2"] .tail { opacity: 0; }
+        .scene[data-scene="2"] .scarf-tip { opacity: .92; }
+        .scene-info {
+            position: absolute;
+            z-index: 6;
+            left: 50%;
+            bottom: 3.2%;
+            transform: translateX(-50%);
+            min-width: max-content;
+            padding: 7px 12px;
+            border: 1px solid #d7ccff38;
+            border-radius: 999px;
+            color: #f0edff;
+            background: #05051b85;
+            backdrop-filter: blur(8px);
+            font: 600 clamp(10px, 1.2vw, 13px)/1.1 system-ui, sans-serif;
+            letter-spacing: .05em;
+            text-shadow: 0 1px 3px #000;
+        }
+        .nav {
+            position: absolute;
+            z-index: 7;
+            inset: 50% 0 auto;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .nav button {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #fff4;
+            border-radius: 50%;
+            color: white;
+            background: #05051c72;
+            backdrop-filter: blur(6px);
+            cursor: pointer;
+            pointer-events: auto;
+            font: 24px/1 system-ui, sans-serif;
+            transition: background 180ms ease, transform 180ms ease;
+        }
+        .nav button:hover,
+        .nav button:focus-visible {
+            background: #6a45aeaa;
+            transform: scale(1.08);
+            outline: 2px solid #d9c8ff;
+            outline-offset: 2px;
+        }
         @keyframes wag {
             0% { transform: rotate(-13deg) translate(-1px, 0); }
             50% { transform: rotate(1deg) translate(0, -1px); }
             100% { transform: rotate(18deg) translate(2px, 0); }
         }
+        @keyframes scarf-wave {
+            from { transform: rotate(-7deg) skewX(-5deg); }
+            to { transform: rotate(9deg) skewX(7deg) translateY(2px); }
+        }
         @media (max-aspect-ratio: 864 / 1242) {
             .scene { width: 100vw; height: auto; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .tail { animation: none; }
+            .tail, .scarf-tip { animation: none; }
+            .background { transition: none; }
         }
     </style>
 </head>
 <body>
-<main class="scene" aria-label="Gato contemplando una Vía Láctea animada">
-    <img class="background" src="assets/galaxy-neko.jpg" alt="Gato con audífonos contemplando la Vía Láctea desde una colina">
+<main class="scene" data-scene="1" aria-label="Colección de paisajes nocturnos animados">
+    <img class="background is-active" src="assets/galaxy-neko.jpg" alt="Gato con audífonos contemplando la Vía Láctea desde una colina">
+    <img class="background" src="assets/fox-meteor-valley.png" alt="Zorro con bufanda contemplando meteoritos sobre un valle de montaña">
     <canvas id="effects" width="432" height="621" aria-hidden="true"></canvas>
     <span class="tail" aria-hidden="true"></span>
+    <span class="scarf-tip" aria-hidden="true"></span>
     <div class="glow" aria-hidden="true"></div>
+    <nav class="nav" aria-label="Cambiar escenario">
+        <button type="button" class="previous" aria-label="Escena anterior">‹</button>
+        <button type="button" class="next" aria-label="Escena siguiente">›</button>
+    </nav>
+    <div class="scene-info" aria-live="polite">01 · Neko cósmico</div>
 </main>
 
 <script>
@@ -112,9 +197,32 @@
 
     const canvas = document.querySelector('#effects');
     const ctx = canvas.getContext('2d');
+    const scene = document.querySelector('.scene');
+    const backgrounds = [...document.querySelectorAll('.background')];
+    const sceneInfo = document.querySelector('.scene-info');
+    const sceneNames = ['01 · Neko cósmico', '02 · Zorro meteorito'];
+    let activeScene = 0;
     const W = canvas.width;
     const skyLimit = 408;
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function showScene(nextIndex) {
+        activeScene = (nextIndex + backgrounds.length) % backgrounds.length;
+        backgrounds.forEach((image, index) => image.classList.toggle('is-active', index === activeScene));
+        scene.dataset.scene = String(activeScene + 1);
+        sceneInfo.textContent = sceneNames[activeScene];
+        const url = new URL(location.href);
+        url.searchParams.set('scene', String(activeScene + 1));
+        history.replaceState(null, '', url);
+    }
+
+    document.querySelector('.previous').addEventListener('click', () => showScene(activeScene - 1));
+    document.querySelector('.next').addEventListener('click', () => showScene(activeScene + 1));
+    addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft') showScene(activeScene - 1);
+        if (event.key === 'ArrowRight') showScene(activeScene + 1);
+    });
+    showScene(Number(new URLSearchParams(location.search).get('scene') || 1) - 1);
 
     let seed = 28471;
     const random = () => ((seed = seed * 16807 % 2147483647) - 1) / 2147483646;
