@@ -345,7 +345,9 @@
     }
 
     .water-motion,
-    .water-ripples {
+    .water-ripples,
+    .wind-grass,
+    #pixel-nature {
       display: none !important;
     }
 
@@ -361,49 +363,70 @@
 
     .animal-motion,
     .persian-character {
-      animation: pixel-music-bob 2.4s steps(8, end) infinite !important;
+      animation: pixel-animal-breathe 3.8s steps(6, end) infinite !important;
       transform-origin: 50% 88% !important;
       will-change: transform;
     }
 
+    .animal-motion {
+      -webkit-mask-image: radial-gradient(ellipse 13% 14% at 50% 70.5%, #000 0 48%, #000d 62%, #0006 76%, transparent 100%) !important;
+      mask-image: radial-gradient(ellipse 13% 14% at 50% 70.5%, #000 0 48%, #000d 62%, #0006 76%, transparent 100%) !important;
+    }
+
+    .scene[data-scene="1"] .animal-motion {
+      -webkit-mask-image: radial-gradient(ellipse 7% 9% at 50% 69%, #000 0 52%, #000c 68%, transparent 100%) !important;
+      mask-image: radial-gradient(ellipse 7% 9% at 50% 69%, #000 0 52%, #000c 68%, transparent 100%) !important;
+    }
+
     .foreground-motion {
-      animation: pixel-grass-wind 3.2s steps(7, end) infinite alternate !important;
+      animation: original-grass-breeze 4.6s steps(8, end) infinite alternate !important;
       transform-origin: 50% 100% !important;
+    }
+
+    .scene:not([data-scene="21"]) .foreground-motion {
+      opacity: .38 !important;
     }
 
     .nature-left,
     .persian-tree-left {
-      animation: pixel-tree-left 4.8s steps(8, end) infinite alternate !important;
+      animation: original-tree-left 6.2s steps(8, end) infinite alternate !important;
       transform-origin: 0 78% !important;
     }
 
     .nature-right,
     .persian-tree-right {
-      animation: pixel-tree-right 5.3s steps(8, end) infinite alternate !important;
+      animation: original-tree-right 6.8s steps(8, end) infinite alternate !important;
       transform-origin: 100% 78% !important;
     }
 
-    @keyframes pixel-music-bob {
-      0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-      20%      { transform: translate3d(-1px, -1px, 0) rotate(-.18deg); }
-      40%      { transform: translate3d(0, -2px, 0) rotate(0deg); }
-      60%      { transform: translate3d(1px, -1px, 0) rotate(.18deg); }
-      80%      { transform: translate3d(0, 0, 0) rotate(0deg); }
+    .scene[data-nature="true"]:not([data-scene="21"]) .nature-left,
+    .scene[data-nature="true"]:not([data-scene="21"]) .nature-right {
+      opacity: .42 !important;
     }
 
-    @keyframes pixel-grass-wind {
-      from { transform: translate3d(-1px, 0, 0) skewX(-.25deg); }
-      to   { transform: translate3d(1px, 0, 0) skewX(.35deg); }
+    .scene[data-scene="21"] .persian-tree-left,
+    .scene[data-scene="21"] .persian-tree-right {
+      opacity: .45 !important;
     }
 
-    @keyframes pixel-tree-left {
-      from { transform: translate3d(0, 0, 0) skewX(-.18deg); }
-      to   { transform: translate3d(1px, 0, 0) skewX(.3deg); }
+    @keyframes pixel-animal-breathe {
+      0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); }
+      50%      { transform: translate3d(0, -1px, 0) scaleY(1.006); }
     }
 
-    @keyframes pixel-tree-right {
-      from { transform: translate3d(0, 0, 0) skewX(.18deg); }
-      to   { transform: translate3d(-1px, 0, 0) skewX(-.3deg); }
+    @keyframes original-grass-breeze {
+      from { transform: translate3d(0, 0, 0) skewX(-.12deg); }
+      to   { transform: translate3d(1px, 0, 0) skewX(.16deg); }
+    }
+
+    @keyframes original-tree-left {
+      from { transform: translate3d(0, 0, 0) skewX(-.08deg); }
+      to   { transform: translate3d(1px, 0, 0) skewX(.14deg); }
+    }
+
+    @keyframes original-tree-right {
+      from { transform: translate3d(0, 0, 0) skewX(.08deg); }
+      to   { transform: translate3d(-1px, 0, 0) skewX(-.14deg); }
     }
 
     #pixel-nature {
@@ -823,7 +846,7 @@
 
       const observer = new MutationObserver(() => requestAnimationFrame(syncAnimalLayer));
       backgrounds.forEach(img => observer.observe(img, { attributes: true, attributeFilter: ['class'] }));
-      requestAnimationFrame(render);
+      /* The generated foreground was removed: only original scene layers move. */
     })();
   </script>
 </body>
