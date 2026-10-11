@@ -1,0 +1,9 @@
+# Archivos locales del sistema y del editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Archivos temporales de previsualización
+preview*.png
+*.log
