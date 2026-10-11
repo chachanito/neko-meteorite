@@ -130,7 +130,44 @@
         .scene[data-scene="10"] .wind-grass,
         .scene[data-scene="15"] .wind-grass,
         .scene[data-scene="18"] .wind-grass,
-        .scene[data-scene="20"] .wind-grass { opacity: .18; }
+        .scene[data-scene="20"] .wind-grass,
+        .scene[data-scene="21"] .wind-grass { opacity: .18; }
+        .persian-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 500ms ease;
+        }
+        .scene[data-scene="21"] .persian-layer { opacity: 1; }
+        .persian-character {
+            background: url('assets/21-persian-cat-lake.png') center / cover no-repeat;
+            clip-path: ellipse(16% 16% at 50% 72%);
+            transform-origin: 50% 78%;
+            animation: persian-breathe 3.6s ease-in-out infinite alternate;
+        }
+        .persian-tree-left,
+        .persian-tree-right {
+            background: url('assets/21-persian-cat-lake.png') center / cover no-repeat;
+            transform-origin: 50% 72%;
+            animation: tree-breeze 5.2s ease-in-out infinite alternate;
+        }
+        .persian-tree-left { clip-path: polygon(0 0, 39% 0, 36% 61%, 18% 67%, 0 72%); }
+        .persian-tree-right {
+            clip-path: polygon(65% 0, 100% 0, 100% 72%, 88% 64%, 74% 58%);
+            animation-direction: alternate-reverse;
+        }
+        .water-ripples {
+            top: 55%;
+            bottom: 21%;
+            height: auto;
+            background:
+                repeating-radial-gradient(ellipse at 50% 35%, transparent 0 12px, #b8d8ff45 13px 14px, transparent 15px 25px);
+            mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+            mix-blend-mode: screen;
+            animation: water-flow 4.5s linear infinite;
+        }
         .tail { opacity: 0; }
         .scene[data-scene="1"] .tail { opacity: 1; }
         .scene[data-scene="2"] .scarf-tip { opacity: .92; }
@@ -198,11 +235,24 @@
             from { transform: skewX(-2deg) translateX(-2px); }
             to { transform: skewX(3deg) translateX(3px); }
         }
+        @keyframes persian-breathe {
+            from { transform: translateY(0) scale(1); }
+            to { transform: translateY(-1px) scale(1.006, 1.012); }
+        }
+        @keyframes tree-breeze {
+            from { transform: skewX(-.35deg) rotate(-.08deg); }
+            to { transform: skewX(.45deg) rotate(.1deg); }
+        }
+        @keyframes water-flow {
+            from { transform: translateY(0) scaleX(1); opacity: .18; }
+            50% { opacity: .3; }
+            to { transform: translateY(8px) scaleX(1.025); opacity: .18; }
+        }
         @media (max-aspect-ratio: 864 / 1242) {
             .scene { width: 100vw; height: auto; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .tail, .scarf-tip, .wind-grass { animation: none; }
+            .tail, .scarf-tip, .wind-grass, .persian-layer { animation: none; }
             .background { transition: none; animation: none; }
         }
     </style>
@@ -229,7 +279,12 @@
     <img class="background" loading="lazy" src="assets/18-wolf-storm.png" alt="Lobo contemplando una tormenta sobre el océano">
     <img class="background" loading="lazy" src="assets/19-astronaut-cat.png" alt="Gato astronauta contemplando la Tierra desde la Luna">
     <img class="background" loading="lazy" src="assets/20-duck-terraces.png" alt="Pato contemplando terrazas de arroz bajo la Vía Láctea">
+    <img class="background" loading="lazy" src="assets/21-persian-cat-lake.png" alt="Gato persa contemplando la Vía Láctea reflejada en un lago">
     <canvas id="effects" width="432" height="621" aria-hidden="true"></canvas>
+    <span class="persian-layer persian-tree-left" aria-hidden="true"></span>
+    <span class="persian-layer persian-tree-right" aria-hidden="true"></span>
+    <span class="persian-layer water-ripples" aria-hidden="true"></span>
+    <span class="persian-layer persian-character" aria-hidden="true"></span>
     <span class="tail" aria-hidden="true"></span>
     <span class="scarf-tip" aria-hidden="true"></span>
     <span class="wind-grass" aria-hidden="true"></span>
@@ -257,12 +312,14 @@
         '10 · Corgi girasol', '11 · Panda rojo faroles', '12 · Koala luna azul',
         '13 · Elefante planetario', '14 · Nutria bioluminiscente',
         '15 · Erizo encantado', '16 · Oso polar', '17 · Rana de loto',
-        '18 · Lobo de tormenta', '19 · Gato astronauta', '20 · Pato de terrazas'
+        '18 · Lobo de tormenta', '19 · Gato astronauta', '20 · Pato de terrazas',
+        '21 · Gato persa del lago'
     ];
     const sceneEffects = [
         'stars', 'meteors', 'petals', 'fireflies', 'aurora', 'rain',
         'petals', 'snow', 'steam', 'fireflies', 'lanterns', 'leaves',
-        'sand', 'bubbles', 'spores', 'snow', 'petals', 'rain', 'comets', 'fireflies'
+        'sand', 'bubbles', 'spores', 'snow', 'petals', 'rain', 'comets', 'fireflies',
+        'persian'
     ];
     let activeScene = 0;
     const W = canvas.width;
