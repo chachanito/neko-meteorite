@@ -345,32 +345,69 @@
     }
 
     .water-motion,
-    .water-ripples,
+    .water-ripples {
+      display: none !important;
+    }
+
+    .animal-motion,
+    .persian-character,
     .foreground-motion,
     .nature-left,
     .nature-right,
     .persian-tree-left,
     .persian-tree-right {
-      display: none !important;
+      image-rendering: pixelated !important;
     }
 
     .animal-motion,
     .persian-character {
-      image-rendering: pixelated !important;
-      animation: pixel-animal-life 3.6s steps(7, end) infinite !important;
+      animation: pixel-music-bob 2.4s steps(8, end) infinite !important;
       transform-origin: 50% 88% !important;
       will-change: transform;
     }
 
-    @keyframes pixel-animal-life {
-      0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); }
-      28%      { transform: translate3d(0, -1px, 0) scaleY(1.004); }
-      52%      { transform: translate3d(1px, -2px, 0) scaleY(1.008); }
-      76%      { transform: translate3d(0, -1px, 0) scaleY(1.003); }
+    .foreground-motion {
+      animation: pixel-grass-wind 3.2s steps(7, end) infinite alternate !important;
+      transform-origin: 50% 100% !important;
+    }
+
+    .nature-left,
+    .persian-tree-left {
+      animation: pixel-tree-left 4.8s steps(8, end) infinite alternate !important;
+      transform-origin: 0 78% !important;
+    }
+
+    .nature-right,
+    .persian-tree-right {
+      animation: pixel-tree-right 5.3s steps(8, end) infinite alternate !important;
+      transform-origin: 100% 78% !important;
+    }
+
+    @keyframes pixel-music-bob {
+      0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+      20%      { transform: translate3d(-1px, -1px, 0) rotate(-.18deg); }
+      40%      { transform: translate3d(0, -2px, 0) rotate(0deg); }
+      60%      { transform: translate3d(1px, -1px, 0) rotate(.18deg); }
+      80%      { transform: translate3d(0, 0, 0) rotate(0deg); }
+    }
+
+    @keyframes pixel-grass-wind {
+      from { transform: translate3d(-1px, 0, 0) skewX(-.25deg); }
+      to   { transform: translate3d(1px, 0, 0) skewX(.35deg); }
+    }
+
+    @keyframes pixel-tree-left {
+      from { transform: translate3d(0, 0, 0) skewX(-.18deg); }
+      to   { transform: translate3d(1px, 0, 0) skewX(.3deg); }
+    }
+
+    @keyframes pixel-tree-right {
+      from { transform: translate3d(0, 0, 0) skewX(.18deg); }
+      to   { transform: translate3d(-1px, 0, 0) skewX(-.3deg); }
     }
 
     #pixel-nature {
-      position: fixed;
+      position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
@@ -381,10 +418,8 @@
     }
 
     .scene-info,
-    .nav-button,
-    .navigation,
+    .nav,
     button {
-      position: relative;
       z-index: 30;
     }
 
@@ -631,12 +666,13 @@
   <script id="pixel-world-engine">
     (() => {
       const PIXEL_WIDTH = 270;
+      const scene = document.querySelector('.scene');
       const backgrounds = [...document.querySelectorAll('.background')];
       const pixelSources = new Map();
       const canvas = document.createElement('canvas');
       canvas.id = 'pixel-nature';
       canvas.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(canvas);
+      scene.appendChild(canvas);
       const ctx = canvas.getContext('2d', { alpha: true });
       ctx.imageSmoothingEnabled = false;
 
@@ -665,7 +701,8 @@
       };
 
       function resizePixelCanvas() {
-        logicalHeight = Math.max(360, Math.round(innerHeight / Math.max(1, innerWidth) * PIXEL_WIDTH));
+        const bounds = scene.getBoundingClientRect();
+        logicalHeight = Math.max(360, Math.round(bounds.height / Math.max(1, bounds.width) * PIXEL_WIDTH));
         canvas.width = PIXEL_WIDTH;
         canvas.height = logicalHeight;
         ctx.imageSmoothingEnabled = false;
@@ -694,7 +731,7 @@
       }
 
       function activeIndex() {
-        const found = backgrounds.findIndex(img => img.classList.contains('active'));
+        const found = backgrounds.findIndex(img => img.classList.contains('is-active'));
         return found < 0 ? 0 : found;
       }
 
@@ -702,7 +739,7 @@
         sceneIndex = activeIndex();
         const url = pixelSources.get(sceneIndex);
         /* The Persian scene owns a separately aligned character layer. */
-        document.querySelectorAll('.animal-motion').forEach(layer => {
+        document.querySelectorAll('.animal-motion, .foreground-motion, .nature-left, .nature-right').forEach(layer => {
           if (url) layer.style.backgroundImage = `url("${url}")`;
         });
       }
