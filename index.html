@@ -337,10 +337,9 @@
         }
     </style>
   <style id="pixel-world-styles">
-    /* Pixel-art rebuild: preserve hard pixels and remove whole-image warping. */
+    /* Smooth original artwork with isolated natural-motion layers. */
     .background {
-      image-rendering: pixelated !important;
-      image-rendering: crisp-edges !important;
+      image-rendering: auto !important;
       animation: none !important;
     }
 
@@ -358,12 +357,12 @@
     .nature-right,
     .persian-tree-left,
     .persian-tree-right {
-      image-rendering: pixelated !important;
+      image-rendering: auto !important;
     }
 
     .animal-motion,
     .persian-character {
-      animation: pixel-animal-breathe 3.8s steps(6, end) infinite !important;
+      animation: natural-animal-breathe 4.2s ease-in-out infinite !important;
       transform-origin: 50% 88% !important;
       will-change: transform;
     }
@@ -379,7 +378,7 @@
     }
 
     .foreground-motion {
-      animation: original-grass-breeze 4.6s steps(8, end) infinite alternate !important;
+      animation: original-grass-breeze 4.8s ease-in-out infinite alternate !important;
       transform-origin: 50% 100% !important;
     }
 
@@ -389,13 +388,13 @@
 
     .nature-left,
     .persian-tree-left {
-      animation: original-tree-left 6.2s steps(8, end) infinite alternate !important;
+      animation: original-tree-left 6.4s ease-in-out infinite alternate !important;
       transform-origin: 0 78% !important;
     }
 
     .nature-right,
     .persian-tree-right {
-      animation: original-tree-right 6.8s steps(8, end) infinite alternate !important;
+      animation: original-tree-right 7s ease-in-out infinite alternate !important;
       transform-origin: 100% 78% !important;
     }
 
@@ -409,7 +408,7 @@
       opacity: .45 !important;
     }
 
-    @keyframes pixel-animal-breathe {
+    @keyframes natural-animal-breathe {
       0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); }
       50%      { transform: translate3d(0, -1px, 0) scaleY(1.006); }
     }
@@ -838,7 +837,7 @@
         requestAnimationFrame(render);
       }
 
-      backgrounds.forEach(pixelateImage);
+      /* Keep the full-resolution original artwork; do not rasterize it to pixels. */
       resizePixelCanvas();
       syncAnimalLayer();
       addEventListener('resize', resizePixelCanvas, { passive: true });
