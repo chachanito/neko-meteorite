@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050719">
+  <title>Neko Sprite Pilot</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100%; margin: 0; }
+    body {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #03040d;
+    }
+
+    .stage {
+      position: relative;
+      width: min(100vw, calc(100svh * 9 / 16));
+      height: min(100svh, calc(100vw * 16 / 9));
+      overflow: hidden;
+      isolation: isolate;
+      background: #0a1030;
+      box-shadow: 0 0 90px #6551c52f;
+    }
+
+    .backdrop {
+      position: absolute;
+      inset: -1.5%;
+      width: 103%;
+      height: 103%;
+      object-fit: cover;
+      animation: camera-drift 18s ease-in-out infinite alternate;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .night-light,
+    .mist,
+    .vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .night-light {
+      z-index: 2;
+      background:
+        radial-gradient(circle at 42% 28%, #b880ff1a 0 12%, transparent 40%),
+        radial-gradient(ellipse at 52% 73%, #8ec8ff12 0 10%, transparent 42%);
+      background-size: 135% 135%;
+      mix-blend-mode: screen;
+      animation: light-drift 11s ease-in-out infinite alternate;
+    }
+
+    .mist {
+      z-index: 3;
+      top: 55%;
+      bottom: auto;
+      height: 16%;
+      background: linear-gradient(90deg, transparent, #b7c9ff1c 38%, #eadcff20 51%, #8fb9ee15 66%, transparent);
+      filter: blur(10px);
+      mix-blend-mode: screen;
+      animation: mist-drift 13s ease-in-out infinite alternate;
+    }
+
+    #atmosphere {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .neko {
+      position: absolute;
+      z-index: 6;
+      left: 50%;
+      bottom: 13%;
+      width: 30%;
+      aspect-ratio: 3 / 4;
+      transform: translateX(-50%);
+      transform-origin: 50% 100%;
+      background-image: url('assets/neko-sprite-sheet.png');
+      background-repeat: no-repeat;
+      background-size: 400% 200%;
+      background-position: 0% 0%;
+      filter: drop-shadow(0 7px 8px #0204139a) drop-shadow(0 0 9px #7d76ff35);
+      will-change: background-position;
+    }
+
+    .ground-shadow {
+      position: absolute;
+      z-index: 5;
+      left: 50%;
+      bottom: 13.7%;
+      width: 23%;
+      height: 4%;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: #04061682;
+      filter: blur(7px);
+      animation: shadow-breathe 1.8s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    .vignette {
+      z-index: 8;
+      box-shadow: inset 0 0 55px #02030c99;
+      background: linear-gradient(180deg, transparent 62%, #02030b30 100%);
+    }
+
+    .toggle {
+      display: none;
+      position: absolute;
+      z-index: 12;
+      right: 14px;
+      bottom: 14px;
+      width: 38px;
+      height: 38px;
+      border: 1px solid #ffffff35;
+      border-radius: 50%;
+      padding: 0;
+      color: #fff;
+      background: #080a2078;
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      opacity: .58;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toggle:hover,
+    .toggle:focus-visible { opacity: 1; transform: scale(1.06); outline: 2px solid #bfc4ff; }
+    .toggle::before { content: 'Ⅱ'; font: 700 14px/1 system-ui; }
+    .stage.is-paused .toggle::before { content: '▶'; }
+    .stage.is-paused * { animation-play-state: paused !important; }
+
+    @keyframes camera-drift {
+      from { transform: scale(1.01) translate3d(0, 0, 0); }
+      to { transform: scale(1.025) translate3d(0, -2px, 0); }
+    }
+    @keyframes light-drift {
+      from { background-position: 0 0; opacity: .62; }
+      to { background-position: 16% 8%; opacity: 1; }
+    }
+    @keyframes mist-drift {
+      from { transform: translate3d(-5%, 0, 0) scaleX(1.08); opacity: .1; }
+      to { transform: translate3d(5%, -2px, 0) scaleX(1.16); opacity: .24; }
+    }
+    @keyframes shadow-breathe {
+      from { transform: translateX(-50%) scaleX(.9); opacity: .54; }
+      to { transform: translateX(-50%) scaleX(1.04); opacity: .72; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .backdrop, .night-light, .mist, .ground-shadow { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="Escena nocturna animada por fotogramas">
+    <img class="backdrop" src="assets/night-valley-background.png" alt="Paisaje nocturno bajo la Vía Láctea">
+    <span class="night-light" aria-hidden="true"></span>
+    <span class="mist" aria-hidden="true"></span>
+    <canvas id="atmosphere" width="360" height="640" aria-hidden="true"></canvas>
+    <span class="ground-shadow" aria-hidden="true"></span>
+    <span class="neko" aria-hidden="true"></span>
+    <span class="vignette" aria-hidden="true"></span>
+    <button class="toggle" type="button" aria-label="Pausar animación"></button>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const stage = document.querySelector('.stage');
+      const neko = document.querySelector('.neko');
+      const toggle = document.querySelector('.toggle');
+      const canvas = document.querySelector('#atmosphere');
+      const ctx = canvas.getContext('2d');
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const frameOrder = [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1];
+      const frameDuration = 145;
+      let paused = false;
+      let pausedAt = 0;
+      let pauseStarted = 0;
+      let lastSpriteFrame = -1;
+
+      function showSpriteFrame(frame) {
+        const column = frame % 4;
+        const row = Math.floor(frame / 4);
+        neko.style.backgroundPosition = `${column * 100 / 3}% ${row * 100}%`;
+      }
+
+      let seed = 87431;
+      const random = () => ((seed = seed * 16807 % 2147483647) - 1) / 2147483646;
+      const stars = Array.from({ length: 74 }, (_, i) => ({
+        x: random() * canvas.width,
+        y: random() * canvas.height * .62,
+        size: i < 13 ? 1.1 + random() * 1.2 : .35 + random() * .8,
+        phase: random() * Math.PI * 2,
+        speed: .7 + random() * 1.8
+      }));
+      const grass = Array.from({ length: 82 }, (_, i) => ({
+        x: random() * canvas.width,
+        y: canvas.height * (.84 + random() * .16),
+        height: 5 + random() * 13,
+        width: .45 + random() * .8,
+        phase: random() * Math.PI * 2,
+        depth: random(),
+        color: i % 4 === 0 ? '#6f83a2' : i % 3 === 0 ? '#455d80' : '#263c62'
+      }));
+
+      function drawStar(star, time) {
+        const pulse = .2 + ((Math.sin(time * star.speed + star.phase) + 1) / 2) * .7;
+        ctx.fillStyle = `rgba(225,226,255,${pulse})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+        if (star.size > 1.55 && pulse > .65) {
+          ctx.fillRect(star.x - 3, star.y, 6, .6);
+          ctx.fillRect(star.x, star.y - 3, .6, 6);
+        }
+      }
+
+      function drawGrass(blade, time, windFrame) {
+        const strength = Math.sin(windFrame * Math.PI / 4 + blade.phase) * (1.2 + blade.depth * 2.2);
+        const gust = Math.sin(time * .55 + blade.phase) * .45;
+        const bend = strength + gust;
+        ctx.strokeStyle = blade.color;
+        ctx.globalAlpha = .24 + blade.depth * .34;
+        ctx.lineWidth = blade.width;
+        ctx.beginPath();
+        ctx.moveTo(blade.x, blade.y);
+        ctx.quadraticCurveTo(
+          blade.x + bend * .32,
+          blade.y - blade.height * .55,
+          blade.x + bend,
+          blade.y - blade.height
+        );
+        ctx.stroke();
+      }
+
+      function drawShootingStar(time) {
+        const cycle = time % 8.5;
+        if (cycle > 1.15) return;
+        const p = cycle / 1.15;
+        const alpha = Math.sin(p * Math.PI) * .8;
+        const x = 45 + p * 135;
+        const y = 76 + p * 54;
+        const gradient = ctx.createLinearGradient(x - 48, y - 19, x, y);
+        gradient.addColorStop(0, 'rgba(160,130,255,0)');
+        gradient.addColorStop(1, `rgba(255,255,255,${alpha})`);
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x - 48, y - 19);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+
+      function render(ms) {
+        const effectiveMs = paused ? pauseStarted - pausedAt : ms - pausedAt;
+        const time = effectiveMs / 1000;
+        const sequenceIndex = Math.floor(effectiveMs / frameDuration) % frameOrder.length;
+        if (!reduced && !paused && sequenceIndex !== lastSpriteFrame) {
+          lastSpriteFrame = sequenceIndex;
+          showSpriteFrame(frameOrder[sequenceIndex]);
+        }
+
+        if (!paused) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          stars.forEach(star => drawStar(star, reduced ? 1 : time));
+          const windFrame = Math.floor(effectiveMs / 180) % 8;
+          grass.forEach(blade => drawGrass(blade, reduced ? 1 : time, windFrame));
+          ctx.globalAlpha = 1;
+          if (!reduced) drawShootingStar(time);
+        }
+        requestAnimationFrame(render);
+      }
+
+      toggle.addEventListener('click', () => {
+        paused = !paused;
+        stage.classList.toggle('is-paused', paused);
+        toggle.setAttribute('aria-label', paused ? 'Reproducir animación' : 'Pausar animación');
+        if (paused) {
+          pauseStarted = performance.now();
+        } else {
+          pausedAt += performance.now() - pauseStarted;
+        }
+      });
+
+      showSpriteFrame(0);
+      requestAnimationFrame(render);
+    })();
+  </script>
+</body>
+</html>
