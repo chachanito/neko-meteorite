@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08091d">
+  <title>El gato mueve la cola</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #08091d;
+      color: #fff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 45%, #25214b 0, #08091d 72%);
+    }
+    .demo {
+      position: relative;
+      width: min(100vw, 69.565vh, 864px);
+      aspect-ratio: 864 / 1242;
+      overflow: hidden;
+      isolation: isolate;
+      container-type: inline-size;
+      box-shadow: 0 24px 90px #000a;
+    }
+    .landscape {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      user-select: none;
+      pointer-events: none;
+    }
+    .shooting-star {
+      position: absolute;
+      z-index: 1;
+      top: 12%;
+      left: 13%;
+      width: 18%;
+      height: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transform: rotate(34deg);
+      transform-origin: right center;
+      animation: meteor 8s linear infinite;
+    }
+    .shooting-star::before {
+      position: absolute;
+      inset: 1px 0 auto;
+      height: 2px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, transparent, #9bdcff 55%, #fff);
+      box-shadow: 0 0 8px 2px #9bdcff;
+      content: "";
+    }
+    .shooting-star::after {
+      position: absolute;
+      top: 0;
+      right: -2px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 6px 3px #d3edff;
+      content: "";
+    }
+    .tail-layer {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+    .tail-wag {
+      transform-box: view-box;
+      transform-origin: 413px 844px;
+      animation: wag 1.8s ease-in-out infinite alternate;
+    }
+    .tail-outline {
+      fill: #8989ad;
+      stroke: #171727;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .tail-highlight {
+      fill: none;
+      stroke: #d7c8dc;
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+    .tail-crease {
+      fill: none;
+      stroke: #333149;
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+    .dedication {
+      position: absolute;
+      z-index: 3;
+      right: 5%;
+      bottom: 4%;
+      left: 5%;
+      padding: 14px 16px 13px;
+      border: 1px solid #ffffff30;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #100e29e8, #17152fdc);
+      box-shadow: 0 8px 28px #05051370, inset 0 1px #ffffff12;
+      backdrop-filter: blur(8px);
+      text-align: center;
+    }
+    .dedication-label {
+      margin: 0 0 7px;
+      color: #d8c7ff;
+      font-size: clamp(9px, 2.4cqw, 12px);
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .dedication-message {
+      margin: 0;
+      color: #fff;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(13px, 3.5cqw, 17px);
+      line-height: 1.42;
+      text-wrap: balance;
+    }
+    .dedication-signoff {
+      margin: 8px 0 0;
+      color: #e5d4fa;
+      font-size: clamp(11px, 2.8cqw, 13px);
+      font-style: italic;
+    }
+    @container (max-width: 380px) {
+      .dedication {
+        right: 4%;
+        bottom: 3%;
+        left: 4%;
+        padding: 11px 12px;
+      }
+      .dedication-label { margin-bottom: 5px; }
+      .dedication-signoff { margin-top: 5px; }
+    }
+    @keyframes wag {
+      from { transform: rotate(-14deg); }
+      to { transform: rotate(14deg); }
+    }
+    @keyframes meteor {
+      0%, 8% { opacity: 0; transform: translate(0, 0) rotate(34deg); }
+      10% { opacity: 1; }
+      29% { opacity: 1; transform: translate(30cqw, 20cqw) rotate(34deg); }
+      33%, 100% { opacity: 0; transform: translate(35cqw, 23cqw) rotate(34deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      .shooting-star { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="demo" aria-label="Gato mirando las estrellas y moviendo la cola">
+    <img class="landscape" src="assets/galaxy-neko.jpg" alt="Gato mirando la Vía Láctea desde una colina">
+    <span class="shooting-star" aria-hidden="true"></span>
+    <svg class="tail-layer" viewBox="0 0 864 1242" preserveAspectRatio="none" aria-hidden="true">
+      <g class="tail-wag">
+        <path class="tail-outline" d="M424 846c-6 8-15 12-24 9-9-3-15-10-17-18-2-8 2-16 9-19 7-3 15 0 18 7 3 6 1 13-4 16-4 2-8 1-11-2 4 8 12 12 20 10l5-4z"/>
+        <path class="tail-highlight" d="M398 835c-5 3-7 8-5 13"/>
+        <path class="tail-crease" d="M407 838c1 5 4 8 9 10"/>
+      </g>
+    </svg>
+    <section class="dedication" aria-label="Dedicatoria para una amiga">
+      <p class="dedication-label">Hola, tanto tiempo</p>
+      <p class="dedication-message">Perdón por haber estado algo distante. Espero que estés bien. Cuando quieras, podríamos ponernos al día.</p>
+      <p class="dedication-signoff">Un saludo.</p>
+    </section>
+  </main>
+</body>
+</html>
