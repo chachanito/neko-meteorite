@@ -2,6 +2,11 @@
 
 La escena combina un gato animado por fotogramas con capas ambientales independientes: césped, flores, ramas laterales, luces lejanas, luciérnagas, neblina y estrellas fugaces. Los movimientos son lentos y están diseñados para conservar intacto el fondo original.
 
+## Video vertical
+
+- `exports/neko-noche-2min.mp4`: versión MP4 de 2 minutos, 720 × 1280, H.264 y sin texto.
+- `render_video.py`: permite volver a generar el video y cambiar su duración o sus fotogramas por segundo.
+
 Primer ejemplo del nuevo proyecto de animación por fotogramas.
 
 - Fondo original independiente.
