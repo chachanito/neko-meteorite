@@ -7,6 +7,10 @@ La escena combina un gato animado por fotogramas con capas ambientales independi
 - `exports/neko-noche-2min.mp4`: versión MP4 de 2 minutos, 720 × 1280, H.264 y sin texto.
 - `render_video.py`: permite volver a generar el video y cambiar su duración o sus fotogramas por segundo.
 
+## Colección de 20 escenas
+
+La carpeta `collection-20` contiene veinte videos adicionales de dos minutos con paisajes, personajes y efectos ambientales diferentes. `render_collection.py` permite regenerar todo el lote.
+
 Primer ejemplo del nuevo proyecto de animación por fotogramas.
 
 - Fondo original independiente.
