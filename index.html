@@ -444,8 +444,7 @@
     }
 
     .cinematic-light,
-    .horizon-mist,
-    .music-pulse {
+    .horizon-mist {
       position: absolute;
       inset: 0;
       pointer-events: none;
@@ -473,81 +472,40 @@
       mix-blend-mode: screen;
     }
 
-    .music-pulse {
-      z-index: 5;
-      left: 50%;
-      top: 69%;
-      width: 5%;
-      height: 3%;
-      right: auto;
-      bottom: auto;
-      border: 1px solid #b8b4ff70;
-      border-radius: 50%;
-      opacity: 0;
-      visibility: hidden;
-      transform: translate(-50%, -50%) scale(.5);
-      animation: music-wave 3.2s ease-out infinite;
+    #effects {
       mix-blend-mode: screen;
+      filter: drop-shadow(0 0 2px #b9c7ff66);
     }
 
-    .music-pulse.delay-two { animation-delay: 1.05s; }
-    .music-pulse.delay-three { animation-delay: 2.1s; }
-    .scene[data-scene="1"] .music-pulse { visibility: visible; }
-
-    .story-caption {
-      position: absolute;
-      z-index: 24;
-      left: 8%;
-      right: 8%;
-      top: 49.5%;
-      color: #ffd83d;
-      text-align: center;
-      font: 900 clamp(20px, 5.3vw, 34px)/1.08 system-ui, -apple-system, sans-serif;
-      letter-spacing: -.025em;
-      text-wrap: balance;
-      -webkit-text-stroke: clamp(1px, .32vw, 2px) #100914;
-      text-shadow: 0 3px 0 #100914, 0 5px 12px #000b;
-      pointer-events: none;
-      transform-origin: center;
+    .scene[data-effect="petals"] .cinematic-light {
+      background: radial-gradient(circle at 35% 38%, #ff8fc424 0 10%, transparent 38%), radial-gradient(circle at 74% 64%, #ffbfd518 0 12%, transparent 36%);
     }
-
-    .story-caption.is-entering {
-      animation: caption-enter 900ms cubic-bezier(.2,.8,.2,1) both;
+    .scene[data-effect="fireflies"] .cinematic-light,
+    .scene[data-effect="lanterns"] .cinematic-light {
+      background: radial-gradient(circle at 38% 62%, #ffd95c24 0 8%, transparent 32%), radial-gradient(circle at 70% 48%, #ffb53c18 0 10%, transparent 35%);
     }
-
-    .story-progress {
-      position: absolute;
-      z-index: 24;
-      left: 10%;
-      right: 10%;
-      top: 4%;
-      height: 2px;
-      overflow: hidden;
-      border-radius: 999px;
-      background: #ffffff26;
-      box-shadow: 0 1px 4px #0008;
-      pointer-events: none;
+    .scene[data-effect="aurora"] .cinematic-light,
+    .scene[data-effect="snow"] .cinematic-light {
+      background: radial-gradient(ellipse at 48% 24%, #62f5e51f 0 16%, transparent 48%), radial-gradient(circle at 68% 62%, #9acaff16 0 12%, transparent 38%);
     }
-
-    .story-progress span {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #d8c5ff, #ffffff, #ffd4f4);
-      transform-origin: left;
-      animation: story-progress 8s linear infinite;
+    .scene[data-effect="rain"] .cinematic-light {
+      background: radial-gradient(ellipse at 50% 52%, #6ea8ff18 0 18%, transparent 52%), linear-gradient(120deg, transparent, #9bc7ff0c, transparent);
     }
-
-    @keyframes caption-enter {
-      0% { opacity: 0; transform: translate3d(0, 12px, 0) scale(.96); filter: blur(3px); }
-      65% { opacity: 1; transform: translate3d(0, -1px, 0) scale(1.015); filter: blur(0); }
-      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+    .scene[data-effect="steam"] .cinematic-light {
+      background: radial-gradient(ellipse at 50% 68%, #e4d8ff24 0 12%, transparent 42%), radial-gradient(circle at 66% 34%, #a8c8ff10, transparent 36%);
     }
-
-    @keyframes story-progress {
-      from { transform: scaleX(0); }
-      to { transform: scaleX(1); }
+    .scene[data-effect="sand"] .cinematic-light {
+      background: radial-gradient(circle at 52% 58%, #ffbe6a22 0 15%, transparent 46%), linear-gradient(105deg, transparent, #ffd28d10, transparent);
+    }
+    .scene[data-effect="bubbles"] .cinematic-light {
+      background: radial-gradient(circle at 48% 56%, #59f1ff20 0 13%, transparent 44%), radial-gradient(circle at 72% 28%, #6da8ff14, transparent 34%);
+    }
+    .scene[data-effect="spores"] .cinematic-light,
+    .scene[data-effect="leaves"] .cinematic-light {
+      background: radial-gradient(circle at 42% 60%, #72e7a31d 0 14%, transparent 42%), radial-gradient(circle at 72% 34%, #b8e68612, transparent 35%);
+    }
+    .scene[data-effect="persian"] .cinematic-light {
+      background: radial-gradient(circle at 78% 18%, #d7dcff24 0 9%, transparent 34%), radial-gradient(ellipse at 52% 64%, #8ccfff12 0 16%, transparent 46%);
     }
 
     @keyframes light-drift {
@@ -558,12 +516,6 @@
     @keyframes mist-drift {
       from { transform: translate3d(-3%, 0, 0) scaleX(1.05); opacity: .12; }
       to { transform: translate3d(3%, -2px, 0) scaleX(1.12); opacity: .24; }
-    }
-
-    @keyframes music-wave {
-      0% { transform: translate(-50%, -50%) scale(.55); opacity: 0; }
-      18% { opacity: .42; }
-      100% { transform: translate(-50%, -50%) scale(7.2); opacity: 0; }
     }
 
     #pixel-nature {
@@ -583,14 +535,15 @@
       z-index: 30;
     }
 
+    .scene-info {
+      display: none !important;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .animal-motion,
       .persian-character { animation: none !important; }
       .cinematic-light,
-      .horizon-mist,
-      .music-pulse,
-      .story-caption,
-      .story-progress span { animation: none !important; }
+      .horizon-mist { animation: none !important; }
       #pixel-nature { display: none; }
     }
   </style>
@@ -633,11 +586,6 @@
     <span class="wind-grass" aria-hidden="true"></span>
     <span class="cinematic-light" aria-hidden="true"></span>
     <span class="horizon-mist" aria-hidden="true"></span>
-    <span class="music-pulse" aria-hidden="true"></span>
-    <span class="music-pulse delay-two" aria-hidden="true"></span>
-    <span class="music-pulse delay-three" aria-hidden="true"></span>
-    <div class="story-progress" aria-hidden="true"><span></span></div>
-    <p class="story-caption is-entering">Y todas las noches</p>
     <div class="glow" aria-hidden="true"></div>
     <nav class="nav" aria-label="Cambiar escenario">
         <button type="button" class="previous" aria-label="Escena anterior">‹</button>
@@ -655,8 +603,6 @@
     const scene = document.querySelector('.scene');
     const backgrounds = [...document.querySelectorAll('.background')];
     const sceneInfo = document.querySelector('.scene-info');
-    const storyCaption = document.querySelector('.story-caption');
-    const storyProgress = document.querySelector('.story-progress span');
     const sceneNames = [
         '01 · Neko cósmico', '02 · Zorro meteorito', '03 · Conejo lunar',
         '04 · Panda luciérnaga', '05 · Búho aurora', '06 · Mapache neón',
@@ -666,19 +612,6 @@
         '15 · Erizo encantado', '16 · Oso polar', '17 · Rana de loto',
         '18 · Lobo de tormenta', '19 · Gato astronauta', '20 · Pato de terrazas',
         '21 · Gato persa del lago'
-    ];
-    const storyLines = [
-        'Y todas las noches', 'El cielo enciende nuevos caminos',
-        'La luna también sabe escuchar', 'La magia vive entre las hojas',
-        'Hay luces que nacen en silencio', 'Incluso la lluvia trae recuerdos',
-        'Cada pétalo guarda un deseo', 'El frío también puede abrazar',
-        'Respira, este instante es tuyo', 'Siempre hay luz detrás del horizonte',
-        'Los sueños encuentran su camino', 'La noche pinta todo de azul',
-        'Hasta los planetas parecen cercanos', 'El océano canta bajo las estrellas',
-        'Los lugares pequeños esconden maravillas', 'Una luz encendida siempre espera',
-        'La calma florece poco a poco', 'Después de la tormenta queda el cielo',
-        'A veces el hogar está muy lejos', 'La tierra también refleja las estrellas',
-        'Quédate un momento más'
     ];
     const sceneEffects = [
         'stars', 'meteors', 'petals', 'fireflies', 'aurora', 'rain',
@@ -706,13 +639,6 @@
         const activeImageUrl = `url("${activeImage.currentSrc || activeImage.src}")`;
         copiedLayers.forEach(layer => { layer.style.backgroundImage = activeImageUrl; });
         sceneInfo.textContent = sceneNames[activeScene];
-        storyCaption.textContent = storyLines[activeScene];
-        storyCaption.classList.remove('is-entering');
-        void storyCaption.offsetWidth;
-        storyCaption.classList.add('is-entering');
-        storyProgress.style.animation = 'none';
-        void storyProgress.offsetWidth;
-        storyProgress.style.animation = '';
         const url = new URL(location.href);
         url.searchParams.set('scene', String(activeScene + 1));
         history.replaceState(null, '', url);
@@ -729,7 +655,7 @@
     let seed = 28471;
     const random = () => ((seed = seed * 16807 % 2147483647) - 1) / 2147483646;
 
-    const ambient = Array.from({ length: 52 }, () => ({
+    const ambient = Array.from({ length: 68 }, () => ({
         x: random() * W,
         y: random() * canvas.height,
         speed: .3 + random() * 1.35,
@@ -737,7 +663,7 @@
         phase: random() * Math.PI * 2
     }));
 
-    const stars = Array.from({ length: 90 }, (_, index) => ({
+    const stars = Array.from({ length: 112 }, (_, index) => ({
         x: random() * W,
         y: random() * skyLimit,
         radius: index < 14 ? 1.25 + random() * 1.2 : .45 + random() * .75,
@@ -747,7 +673,7 @@
         hue: random() > .62 ? '226,216,255' : '255,255,255'
     }));
 
-    const dust = Array.from({ length: 55 }, () => ({
+    const dust = Array.from({ length: 64 }, () => ({
         x: 112 + random() * 155,
         y: random() * 385,
         phase: random() * Math.PI * 2,
