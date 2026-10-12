@@ -1,5 +1,7 @@
 # Neko Sprite Pilot
 
+La escena combina un gato animado por fotogramas con capas ambientales independientes: césped, flores, ramas laterales, luces lejanas, luciérnagas, neblina y estrellas fugaces. Los movimientos son lentos y están diseñados para conservar intacto el fondo original.
+
 Primer ejemplo del nuevo proyecto de animación por fotogramas.
 
 - Fondo original independiente.
