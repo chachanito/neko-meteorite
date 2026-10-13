@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070923">
+  <title>Zorro escuchando música · 50 fotogramas</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #030514;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100svh;
+      overflow: hidden;
+      isolation: isolate;
+      background: #0b0d37;
+    }
+
+    .background,
+    .color-grade,
+    #sky-effects,
+    .character-stage,
+    .ground-shadow,
+    .vignette {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .background {
+      z-index: 0;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .color-grade {
+      z-index: 1;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 66%, #ffc9e112 0 9%, transparent 35%),
+        linear-gradient(180deg, #536dff09, transparent 58%, #03051828);
+      mix-blend-mode: screen;
+    }
+
+    #sky-effects {
+      z-index: 2;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .ground-shadow {
+      z-index: 3;
+      left: 50%;
+      bottom: 4.8%;
+      width: clamp(170px, 24vw, 410px);
+      height: clamp(28px, 4vw, 68px);
+      border-radius: 50%;
+      background: #0203169c;
+      filter: blur(15px);
+      transform: translateX(-50%);
+    }
+
+    .character-stage {
+      z-index: 4;
+      left: 50%;
+      bottom: 1.5%;
+      width: clamp(235px, 27vw, 450px);
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+      filter: drop-shadow(0 18px 14px #03041a66);
+    }
+
+    #fox-frame {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .headphone-aura {
+      position: absolute;
+      z-index: -1;
+      left: 50%;
+      top: 28%;
+      width: 49%;
+      height: 24%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, #58eaff2b, #995cff14 43%, transparent 72%);
+      filter: blur(13px);
+      transform: translate(-50%, -50%);
+      animation: aura 2.08s ease-in-out infinite alternate;
+    }
+
+    .vignette {
+      z-index: 8;
+      inset: 0;
+      box-shadow: inset 0 0 11vmax #0203135c;
+    }
+
+    .watermark {
+      position: absolute;
+      z-index: 9;
+      top: max(14px, env(safe-area-inset-top));
+      right: max(18px, env(safe-area-inset-right));
+      margin: 0;
+      color: rgba(235, 242, 255, .62);
+      font: 600 clamp(11px, .85vw, 14px)/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+      letter-spacing: .12em;
+      text-transform: lowercase;
+      text-shadow: 0 1px 5px rgba(2, 3, 19, .75);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .loading {
+      position: fixed;
+      z-index: 20;
+      left: 50%;
+      bottom: max(22px, env(safe-area-inset-bottom));
+      padding: 9px 14px;
+      border: 1px solid #d9e7ff31;
+      border-radius: 999px;
+      color: #eaf2ff;
+      background: #080d2fc4;
+      backdrop-filter: blur(10px);
+      font-size: 12px;
+      letter-spacing: .04em;
+      transform: translateX(-50%);
+      transition: opacity .45s ease, visibility .45s;
+    }
+
+    .loading.is-ready { opacity: 0; visibility: hidden; }
+
+    .motion-toggle {
+      position: fixed;
+      z-index: 20;
+      right: max(15px, env(safe-area-inset-right));
+      bottom: max(15px, env(safe-area-inset-bottom));
+      width: 46px;
+      height: 46px;
+      border: 1px solid #d9e7ff42;
+      border-radius: 50%;
+      color: #f4f7ff;
+      background: #080d2fbd;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      font: 700 17px/1 system-ui, sans-serif;
+      transition: transform .2s, background-color .2s;
+    }
+
+    .motion-toggle:hover { transform: scale(1.06); background: #202a61d9; }
+    .motion-toggle:focus-visible { outline: 2px solid #87eaff; outline-offset: 3px; }
+
+    @keyframes aura {
+      from { opacity: .28; transform: translate(-50%, -50%) scale(.94); }
+      to { opacity: .65; transform: translate(-50%, -50%) scale(1.08); }
+    }
+
+    @media (max-aspect-ratio: 4 / 3) {
+      .background { object-position: center; }
+      .character-stage { width: min(54vw, 410px); bottom: 3%; }
+      .ground-shadow { width: min(46vw, 350px); bottom: 6%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .headphone-aura { animation: none; opacity: .35; }
+    }
+  </style>
+</head>
+<body>
+  <main class="scene" aria-label="Zorro animado de espaldas escuchando música frente a un paisaje espacial">
+    <img class="background" src="assets/fox-loop/meteor-valley-background.png" alt="Paisaje espacial con montañas, lago y meteoros">
+    <div class="color-grade" aria-hidden="true"></div>
+    <canvas id="sky-effects" aria-hidden="true"></canvas>
+    <div class="ground-shadow" aria-hidden="true"></div>
+    <div class="character-stage" aria-hidden="true">
+      <span class="headphone-aura"></span>
+      <img id="fox-frame" src="assets/fox-rig-v3/frames/fox-000.png" alt="">
+    </div>
+    <div class="vignette" aria-hidden="true"></div>
+    <p class="watermark" aria-label="Marca de agua chachnito">chachnito</p>
+  </main>
+
+  <div class="loading" role="status">Cargando 50 fotogramas…</div>
+  <button class="motion-toggle" type="button" aria-label="Pausar animación" title="Pausar animación">Ⅱ</button>
+
+  <script>
+    (() => {
+      const FRAME_COUNT = 50;
+      const FPS = 12;
+      const FRAME_TIME = 1000 / FPS;
+      const framePaths = Array.from(
+        { length: FRAME_COUNT },
+        (_, index) => `assets/fox-rig-v3/frames/fox-${String(index).padStart(3, '0')}.png`
+      );
+
+      const scene = document.querySelector('.scene');
+      const frameImage = document.querySelector('#fox-frame');
+      const loading = document.querySelector('.loading');
+      const button = document.querySelector('.motion-toggle');
+      const canvas = document.querySelector('#sky-effects');
+      const ctx = canvas.getContext('2d');
+      const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      const frames = [];
+      const starDust = [];
+
+      let loaded = 0;
+      let paused = reducedMotion.matches;
+      let animationStart = performance.now();
+      let pausedAt = 0;
+      let width = 1;
+      let height = 1;
+      let pixelRatio = 1;
+
+      function preloadFrames() {
+        framePaths.forEach((path, index) => {
+          const image = new Image();
+          image.decoding = 'async';
+          image.onload = () => {
+            loaded += 1;
+            loading.textContent = `Cargando fotogramas… ${loaded}/${FRAME_COUNT}`;
+            if (loaded === FRAME_COUNT) loading.hidden = true;
+          };
+          image.src = path;
+          frames[index] = image;
+        });
+      }
+
+      function seed(number) {
+        const value = Math.sin(number * 917.37) * 43758.5453;
+        return value - Math.floor(value);
+      }
+
+      function resizeCanvas() {
+        const bounds = scene.getBoundingClientRect();
+        width = Math.max(1, Math.round(bounds.width));
+        height = Math.max(1, Math.round(bounds.height));
+        pixelRatio = Math.min(2, devicePixelRatio || 1);
+        canvas.width = Math.round(width * pixelRatio);
+        canvas.height = Math.round(height * pixelRatio);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+        starDust.length = 0;
+        for (let index = 0; index < 52; index += 1) {
+          starDust.push({
+            x: seed(index + 11) * width,
+            y: seed(index + 71) * height * .62,
+            radius: .4 + seed(index + 141) * 1.35,
+            phase: seed(index + 211) * Math.PI * 2
+          });
+        }
+      }
+
+      function drawMeteor(time, meteor) {
+        const local = (time - meteor.at + 12) % 12;
+        if (local > meteor.duration) return;
+
+        const progress = local / meteor.duration;
+        const alpha = Math.sin(progress * Math.PI);
+        const x = width * (meteor.x + progress * meteor.dx);
+        const y = height * (meteor.y + progress * meteor.dy);
+        const trailX = width * meteor.trail;
+        const trailY = trailX * (meteor.dy / meteor.dx);
+        const gradient = ctx.createLinearGradient(x - trailX, y - trailY, x, y);
+        gradient.addColorStop(0, 'rgba(135,166,255,0)');
+        gradient.addColorStop(.68, `rgba(181,215,255,${.5 * alpha})`);
+        gradient.addColorStop(1, `rgba(255,255,255,${alpha})`);
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = meteor.size;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x - trailX, y - trailY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath();
+        ctx.arc(x, y, meteor.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawSky(time) {
+        ctx.clearRect(0, 0, width, height);
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+
+        for (const star of starDust) {
+          const pulse = .18 + .72 * Math.pow((Math.sin(time * 1.2 + star.phase) + 1) / 2, 4);
+          ctx.fillStyle = `rgba(218,231,255,${pulse})`;
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        [
+          { at: .5, x: -.08, y: .12, dx: .32, dy: .12, trail: .09, size: 1.8, duration: 1.25 },
+          { at: 3.1, x: .61, y: .08, dx: .28, dy: .1, trail: .075, size: 1.45, duration: 1.1 },
+          { at: 6.0, x: .12, y: .29, dx: .24, dy: .085, trail: .065, size: 1.25, duration: 1.15 },
+          { at: 8.7, x: .7, y: .24, dx: .31, dy: .12, trail: .09, size: 1.75, duration: 1.3 },
+          { at: 10.55, x: .36, y: .04, dx: .22, dy: .075, trail: .06, size: 1.15, duration: 1.05 }
+        ].forEach(meteor => drawMeteor(time, meteor));
+
+        ctx.restore();
+      }
+
+      function render(now) {
+        requestAnimationFrame(render);
+        if (paused) return;
+
+        const elapsed = now - animationStart;
+        const frameIndex = Math.floor(elapsed / FRAME_TIME) % FRAME_COUNT;
+        const frame = frames[frameIndex];
+        if (frame?.complete) frameImage.src = frame.src;
+        drawSky((elapsed / 1000) % 12);
+      }
+
+      function togglePlayback() {
+        paused = !paused;
+        if (paused) {
+          pausedAt = performance.now();
+        } else {
+          animationStart += performance.now() - pausedAt;
+        }
+        button.textContent = paused ? '▶' : 'Ⅱ';
+        button.setAttribute('aria-label', paused ? 'Reanudar animación' : 'Pausar animación');
+        button.title = paused ? 'Reanudar animación' : 'Pausar animación';
+      }
+
+      button.addEventListener('click', togglePlayback);
+      addEventListener('resize', resizeCanvas, { passive: true });
+      reducedMotion.addEventListener('change', event => {
+        if (event.matches && !paused) togglePlayback();
+      });
+
+      preloadFrames();
+      resizeCanvas();
+      if (paused) {
+        button.textContent = '▶';
+        button.setAttribute('aria-label', 'Reanudar animación');
+      }
+      requestAnimationFrame(render);
+    })();
+  </script>
+</body>
+</html>
